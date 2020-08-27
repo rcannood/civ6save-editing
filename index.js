@@ -165,33 +165,32 @@ function savetomapjson(savefile) {
       'y': Math.floor(i / mapsizedata[tiles].x),
       'hex_location': mindex,
       'tile_length': 55 + buflength,
-      'int16_1': bin.readUInt16LE(mindex),
-      'int16_2': bin.readUInt16LE(mindex+2),
-      'int16_3': bin.readUInt16LE(mindex+4),
-      'int16_4': bin.readUInt16LE(mindex+8),
-      'landmass': bin.readUInt32LE(mindex+8),
-      'terrain': bin.readUInt32LE(mindex+12),              // e.g. snow, tundra, hills, mountains
-      'feature': bin.readUInt32LE(mindex+16),              // e.g. forest
+      'int16_1': bin.readInt16LE(mindex),                  // what do these 8 bytes represent?
+      'int16_2': bin.readInt16LE(mindex+2),
+      'int16_3': bin.readInt16LE(mindex+4),
+      'int16_4': bin.readInt16LE(mindex+8),
+      'landmass': bin.readInt32LE(mindex+8),
+      'terrain': bin.readUInt32LE(mindex+12),              // e.g. snow, tundra, plains, possibly with hills or mountains
+      'feature': bin.readUInt32LE(mindex+16),              // e.g. forest, marsh, ice
       'natural_wonder': bin.readInt16LE(mindex + 20),
       'continent': bin.readUInt32LE(mindex + 22),
       'number_of_units': bin.readInt8(mindex + 26),
-      'resource_type': bin.readUInt32LE(mindex + 27),
+      'resource': bin.readUInt32LE(mindex + 27),
       'resource_boolean': bin.readInt16LE(mindex + 31),
       'improvement': bin.readUInt32LE(mindex + 33),
-      'improvement_player': bin.readUInt8(mindex + 37),
-      'road_level': bin.readUInt8(mindex + 38),            // 1: classical, 2: industrial, 3: modern
-      'road_level_2': bin.readUInt8(mindex + 39),          // why a second time?
+      'improvement_owner': bin.readInt8(mindex + 37),
+      'road_level': bin.readInt16LE(mindex + 38),          // -1: none, 257: classical, 1026: industrial, 1283: modern
       'appeal': bin.readInt16LE(mindex + 40),
-      'river_e': bin.readUInt8(mindex + 42),               // don't know what different values stand for
-      'river_se': bin.readUInt8(mindex + 43),              // don't know what different values stand for
-      'river_sw': bin.readUInt8(mindex + 44),              // don't know what different values stand for
-      'river_count': bin.readUInt8(mindex + 45),
+      'river_e': bin.readInt8(mindex + 42),                // river at eastern border        -1: no, 0: yes, 3: yes
+      'river_se': bin.readInt8(mindex + 43),               // river at south-eastern border  -1: no, 1: yes, 4: yes
+      'river_sw': bin.readInt8(mindex + 44),               // river at south-western border  -1: no, 2: yes, 5: yes
+      'river_count': bin.readUInt8(mindex + 45),           // number of adjacent river tiles
       'river_map': bin.readUInt8(mindex + 46),             // river 6 bits: NW, W, SW, SE, E, NE
-      'cliff_map': bin.readInt8(mindex + 47),              // cliff 6 bits: NW, W, SW, SE, E, NE
+      'cliff_map': bin.readUInt8(mindex + 47),             // cliff 6 bits: NW, W, SW, SE, E, NE
       'flags1': bin.readUInt8(mindex + 48),
       'flags2': bin.readUInt8(mindex + 49),
       'flags3': bin.readUInt8(mindex + 50),
-      'flags4': bin.readUInt8(mindex + 51),
+      'flags4': bin.readUInt8(mindex + 51),                // bits: [buffer length 24, buffer length 44, -, -, -, -, -, -]
       'flags5': bin.readUInt8(mindex + 52),                // empty?
       'flags6': bin.readUInt8(mindex + 53),                // empty?
       'flags7': bin.readUInt8(mindex + 54),                // empty?
