@@ -204,27 +204,23 @@ function savetomapjson(savefile) {
       } else {
         obj['buffer2'] = '';
       }
+    } else if (obj['flags4'] & 2) {
+      obj['buffer1'] = bin.slice(mindex, mindex + 24).toString('hex');
+      obj['buffer1_flag'] = bin.readUInt8(mindex + 20);
+      obj['buffer2'] = bin.slice(mindex + 24, mindex + 44).toString('hex');
+      mindex += 44;
     } else {
       obj['buffer1'] = '';
       obj['buffer1_flag'] = '';
       obj['buffer2'] = '';
     }
 
-    
-    if (obj['flags4'] & 2) {
-      // ??
-      obj['buffer3'] = bin.slice(mindex, mindex + 44).toString('hex');
-      mindex += 44;
-    } else {
-      obj['buffer3'] = '';
-    }
-    
     if (obj['flags2'] & 64) {
       // tile is owned by a player
-      obj['buffer4'] = bin.slice(mindex, mindex + 17).toString('hex');
+      obj['buffer3'] = bin.slice(mindex, mindex + 17).toString('hex');
       mindex += 17;
     } else {
-      obj['buffer4'] = '';
+      obj['buffer3'] = '';
     }
     
     obj['tile_length'] = mindex - orig_mindex;
