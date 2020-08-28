@@ -151,20 +151,12 @@ function savetomapjson(savefile) {
   let mindex = mapstartindex + 16;
 
   for (let i = 0; i < tiles; i++) {
-    const num1 = bin.readUInt8(mindex + 49);
-    const num2 = bin.readUInt8(mindex + 51);
-    let buflength = 0;
-
-    (num1 & 64) && (buflength += 17);
-    (num2 & 1) && (buflength += 24);
-    (num2 & 2) && (buflength += 44);
-
-    // See bin-structure.md for WIP documentation on what each of these values are
-    map.tiles.push({
+    let orig_mindex = mindex;
+    
+    let obj = {
       'x': i % mapsizedata[tiles].x,
       'y': Math.floor(i / mapsizedata[tiles].x),
       'hex_location': mindex,
-      'tile_length': 55 + buflength,
       'int16_1': bin.readInt16LE(mindex),                  // what do these 8 bytes represent?
       'int16_2': bin.readInt16LE(mindex+2),
       'int16_3': bin.readInt16LE(mindex+4),
@@ -187,17 +179,57 @@ function savetomapjson(savefile) {
       'river_count': bin.readUInt8(mindex + 45),           // number of adjacent river tiles
       'river_map': bin.readUInt8(mindex + 46),             // river 6 bits: NW, W, SW, SE, E, NE
       'cliff_map': bin.readUInt8(mindex + 47),             // cliff 6 bits: NW, W, SW, SE, E, NE
-      'flags1': bin.readUInt8(mindex + 48),
-      'flags2': bin.readUInt8(mindex + 49),
-      'flags3': bin.readUInt8(mindex + 50),
+      'flags1': bin.readUInt8(mindex + 48),                // bits: [is_pillaged, -, -, is_capital_or_citystate, -, river_sw, river_e, river_se]
+      'flags2': bin.readUInt8(mindex + 49),                // bits: [cliff_sw, cliff_e, cliff_se, -, -, is_impassable, is_owned, -]
+      'flags3': bin.readUInt8(mindex + 50),                // bits: [is_ice, -, -, -, -, -, -, -]
       'flags4': bin.readUInt8(mindex + 51),                // bits: [buffer length 24, buffer length 44, -, -, -, -, -, -]
       'flags5': bin.readUInt8(mindex + 52),                // empty?
       'flags6': bin.readUInt8(mindex + 53),                // empty?
       'flags7': bin.readUInt8(mindex + 54),                // empty?
-      'buffer': bin.slice(mindex + 55, mindex + 55 + buflength).toString('hex'),
-    });
+    }
+    mindex += 55;
+    
+    let buflength = 0;
 
-    mindex += 55 + buflength;
+    if (obj['flags4'] & 1) {
+      // tile produces/captures co2?
+      obj['buffer1'] = bin.slice(mindex, mindex + 24).toString('hex');
+      obj['buffer1_flag'] = bin.readUInt8(mindex + 20);
+      mindex += 24;
+     
+      if (obj['buffer1_flag'] & 1) {
+        // tile is ski resort or tunnel??
+        obj['buffer2'] = bin.slice(mindex, mindex + 20).toString('hex');
+        mindex += 20;
+      } else {
+        obj['buffer2'] = '';
+      }
+    } else {
+      obj['buffer1'] = '';
+      obj['buffer1_flag'] = '';
+      obj['buffer2'] = '';
+    }
+
+    
+    if (obj['flags4'] & 2) {
+      // ??
+      obj['buffer3'] = bin.slice(mindex, mindex + 44).toString('hex');
+      mindex += 44;
+    } else {
+      obj['buffer3'] = '';
+    }
+    
+    if (obj['flags2'] & 64) {
+      // tile is owned by a player
+      obj['buffer4'] = bin.slice(mindex, mindex + 17).toString('hex');
+      mindex += 17;
+    } else {
+      obj['buffer4'] = '';
+    }
+    
+    obj['tile_length'] = mindex - orig_mindex;
+
+    map.tiles.push(obj);
   }
   return map;
 }
