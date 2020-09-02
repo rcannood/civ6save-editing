@@ -157,21 +157,19 @@ function savetomapjson(savefile) {
       'x': i % mapsizedata[tiles].x,
       'y': Math.floor(i / mapsizedata[tiles].x),
       'hex_location': mindex,
-      'int16_1': bin.readInt16LE(mindex),                  // what do these 8 bytes represent?
-      'int16_2': bin.readInt16LE(mindex+2),
-      'int16_3': bin.readInt16LE(mindex+4),
-      'int16_4': bin.readInt16LE(mindex+8),
-      'landmass': bin.readInt32LE(mindex+8),
-      'terrain': bin.readUInt32LE(mindex+12),              // e.g. snow, tundra, plains, possibly with hills or mountains
-      'feature': bin.readUInt32LE(mindex+16),              // e.g. forest, marsh, ice
-      'natural_wonder': bin.readInt16LE(mindex + 20),
+      'travel_regions': bin.readUInt32LE(mindex),
+      'connected_regions': bin.readUInt32LE(mindex + 4),
+      'landmass': bin.readUInt32LE(mindex + 8),
+      'terrain': bin.readUInt32LE(mindex + 12),
+      'feature': bin.readUInt32LE(mindex + 16),
+      'natural_wonder_order': bin.readUInt16LE(mindex + 20),
       'continent': bin.readUInt32LE(mindex + 22),
-      'number_of_units': bin.readInt8(mindex + 26),
+      'number_of_units': bin.readUInt8(mindex + 26),
       'resource': bin.readUInt32LE(mindex + 27),
-      'resource_boolean': bin.readInt16LE(mindex + 31),
+      'resource_boolean': bin.readUInt16LE(mindex + 31),
       'improvement': bin.readUInt32LE(mindex + 33),
       'improvement_owner': bin.readInt8(mindex + 37),
-      'road_level': bin.readInt16LE(mindex + 38),          // -1: none, 257: classical, 1026: industrial, 1283: modern
+      'road': bin.readInt16LE(mindex + 38),                // -1: none, 257: classical, 1026: industrial, 1283: modern
       'appeal': bin.readInt16LE(mindex + 40),
       'river_e': bin.readInt8(mindex + 42),                // river at eastern border        -1: no, 0: yes, 3: yes
       'river_se': bin.readInt8(mindex + 43),               // river at south-eastern border  -1: no, 1: yes, 4: yes
@@ -179,7 +177,7 @@ function savetomapjson(savefile) {
       'river_count': bin.readUInt8(mindex + 45),           // number of adjacent river tiles
       'river_map': bin.readUInt8(mindex + 46),             // river 6 bits: NW, W, SW, SE, E, NE
       'cliff_map': bin.readUInt8(mindex + 47),             // cliff 6 bits: NW, W, SW, SE, E, NE
-      'flags1': bin.readUInt8(mindex + 48),                // bits: [is_pillaged, -, -, is_capital_or_citystate, -, river_sw, river_e, river_se]
+      'flags1': bin.readUInt8(mindex + 48),                // bits: [is_pillaged, road_pillaged??, has_road, is_capital_or_citystate, -, river_sw, river_e, river_se]
       'flags2': bin.readUInt8(mindex + 49),                // bits: [cliff_sw, cliff_e, cliff_se, -, -, is_impassable, is_owned, -]
       'flags3': bin.readUInt8(mindex + 50),                // bits: [is_ice, -, -, -, -, -, -, -]
       'flags4': bin.readUInt8(mindex + 51),                // bits: [buffer length 24, buffer length 44, -, -, -, -, -, -]
@@ -217,10 +215,18 @@ function savetomapjson(savefile) {
 
     if (obj['flags2'] & 64) {
       // tile is owned by a player
-      obj['buffer3'] = bin.slice(mindex, mindex + 17).toString('hex');
+      obj['city_1'] = bin.readUInt32LE(mindex);
+      obj['city_2'] = bin.readUInt32LE(mindex + 4);
+      obj['district'] = bin.readUInt32LE(mindex + 8);
+      obj['owner'] = bin.readUInt8(mindex + 12);
+      obj['world_wonder'] = bin.readUInt32LE(mindex + 13);
       mindex += 17;
     } else {
-      obj['buffer3'] = '';
+      obj['city_1'] = '';
+      obj['city_2'] = '';
+      obj['district'] = '';
+      obj['owner'] = '';
+      obj['world_wonder'] = '';
     }
     
     obj['tile_length'] = mindex - orig_mindex;
